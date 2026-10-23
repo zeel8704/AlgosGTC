@@ -1,75 +1,64 @@
 import Link from 'next/link';
 import { BRAND, RISK_DISCLAIMER } from '@/config/brand';
-import { TrendingUp } from 'lucide-react';
+import { getAllStrategies } from '@/data/strategies';
+import { Logo } from '@/components/Logo';
 
 // Evaluated once at build/import time (not during render) so prerendering stays deterministic.
 const CURRENT_YEAR = new Date().getFullYear();
 
 export function Footer() {
+  const strategies = getAllStrategies();
+
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--bg-secondary)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, var(--gold-dark), var(--gold))' }}>
-                <TrendingUp size={14} className="text-[#0a0e1a]" />
-              </div>
-              <span className="text-sm font-bold text-gradient-gold">{BRAND.name}</span>
-            </div>
-            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-              {BRAND.tagline}. Quantitative XAUUSD algorithmic trading systems.
+    <footer className="bg-espresso text-on-dark">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-20 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-14 border-b border-on-dark/10">
+          <div className="md:col-span-5">
+            <Link href="/" aria-label="Golden Teak Capital home" className="inline-block">
+              <Logo variant="dark" size="md" />
+            </Link>
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-on-dark-2">
+              Systematic mean-reversion strategies for XAUUSD, each sized to the account it was tested on and
+              documented with real-tick backtest data.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
-              Strategies
-            </h4>
-            <ul className="space-y-2">
-              {['Standard', 'Mini', 'Micro'].map((algo) => (
-                <li key={algo}>
-                  <Link href={`/algos/${algo.toLowerCase()}`}
-                    className="text-sm text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">
-                    Aurum {algo}
+          <div className="md:col-span-3">
+            <h2 className="eyebrow-dark mb-5">Strategies</h2>
+            <ul className="space-y-3">
+              {strategies.map((s) => (
+                <li key={s.config.id}>
+                  <Link
+                    href={`/algos/${s.config.slug}`}
+                    className="group flex items-baseline justify-between gap-4 text-sm text-on-dark hover:text-gold-soft transition-colors"
+                  >
+                    <span>{s.config.name}</span>
+                    <span className="tnum text-xs text-on-dark-2 group-hover:text-gold-soft">
+                      {s.config.capitalRequirement.minimumINR}
+                    </span>
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Resources */}
-          <div>
-            <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
-              Resources
-            </h4>
-            <ul className="space-y-2">
-              <li><Link href="/algos" className="text-sm text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">Algo Portfolio</Link></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
-              Legal
-            </h4>
-            <ul className="space-y-2">
-              <li><Link href="/contact" className="text-sm text-[var(--text-muted)] hover:text-[var(--gold)] transition-colors">Contact</Link></li>
+          <div className="md:col-span-2 md:col-start-11">
+            <h2 className="eyebrow-dark mb-5">Firm</h2>
+            <ul className="space-y-3 text-sm">
+              <li><Link href="/algos" className="text-on-dark hover:text-gold-soft transition-colors">All strategies</Link></li>
+              <li><Link href="/contact" className="text-on-dark hover:text-gold-soft transition-colors">Request evaluation</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Risk Disclaimer */}
-        <div className="border-t border-[var(--border)] pt-6">
-          <p className="text-[10px] text-[var(--text-muted)] leading-relaxed max-w-4xl">
-            <strong className="text-[var(--text-secondary)]">Risk Disclosure:</strong>{' '}
-            {RISK_DISCLAIMER}
+        <div className="pt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <p className="lg:col-span-9 text-[11px] leading-relaxed text-on-dark-2">
+            <span className="font-semibold text-on-dark">Risk disclosure.</span> {RISK_DISCLAIMER}
           </p>
-          <p className="text-[10px] text-[var(--text-muted)] mt-4">
-            © {CURRENT_YEAR} {BRAND.legal.companyName}. All rights reserved.
+          <p className="lg:col-span-3 lg:text-right text-[11px] text-on-dark-2">
+            © {CURRENT_YEAR} {BRAND.legal.companyName}
+            <br />
+            All rights reserved.
           </p>
         </div>
       </div>

@@ -1,105 +1,91 @@
 import Link from 'next/link';
 import type { StrategyData } from '@/types';
-import { formatCurrency, formatPercentUnsigned, formatRatio, formatInteger } from '@/lib/formatters';
-import { ArrowRight, TrendingUp, Shield, BarChart3 } from 'lucide-react';
+import { TIER_LABELS } from '@/config/brand';
+import { formatInteger, formatPercentUnsigned, formatRatio, formatDateShort } from '@/lib/formatters';
+import { Sparkline } from '@/components/charts/Sparkline';
+import { ArrowUpRight } from 'lucide-react';
 
 interface StrategyCardProps {
   strategy: StrategyData;
-  variant?: 'compact' | 'full';
+  /** Renders the card on espresso; used for the flagship tier. */
+  featured?: boolean;
 }
 
-export function StrategyCard({ strategy }: StrategyCardProps) {
+export function StrategyCard({ strategy, featured = false }: StrategyCardProps) {
   const { config, originalMetrics: m } = strategy;
-  const href = `/algos/${config.slug}`;
+  const tier = TIER_LABELS[config.shortName];
+  const dark = featured;
 
-  const tierColors: Record<string, string> = {
-    Standard: 'from-amber-500/20 to-amber-600/5',
-    Mini: 'from-sky-500/20 to-sky-600/5',
-    Micro: 'from-emerald-500/20 to-emerald-600/5',
-  };
+  const surface = dark ? 'bg-espresso border-espresso text-on-dark' : 'bg-ivory border-line text-ink';
+  const muted = dark ? 'text-on-dark-2' : 'text-ink-3';
+  const body = dark ? 'text-on-dark-2' : 'text-ink-2';
+  const rule = dark ? 'border-on-dark/12' : 'border-line';
+  const labelCls = `label ${dark ? 'text-on-dark-2' : ''}`;
 
-  const tierAccent: Record<string, string> = {
-    Standard: '#f59e0b',
-    Mini: '#38bdf8',
-    Micro: '#34d399',
-  };
-
-  const accent = tierAccent[config.shortName] ?? 'var(--gold)';
-  const gradient = tierColors[config.shortName] ?? 'from-amber-500/20 to-amber-600/5';
+  const metrics: [string, string][] = [
+    ['CAGR', formatPercentUnsigned(m.cagr)],
+    ['Max DD', formatPercentUnsigned(m.maxDrawdownPct)],
+    ['Profit factor', formatRatio(m.profitFactor)],
+  ];
 
   return (
-    <div className="card group">
-      {/* Accent bar */}
-      <div className="h-1 rounded-t-xl" style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }} />
+    <article
+      className={`group relative flex flex-col rounded-[6px] border overflow-hidden card-hover ${surface} ${
+        dark ? 'shadow-[0_30px_60px_-30px_rgba(43,26,16,0.6)]' : 'shadow-[0_12px_32px_-24px_rgba(58,36,22,0.25)]'
+      }`}
+    >
+      {dark && <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-soft to-transparent" />}
 
-      <div className="card-inner">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-bold text-[var(--text-primary)]">{config.name}</h3>
-            <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              {config.platform.symbol} · {config.platform.platform}
-            </p>
-          </div>
-          <div
-            className="px-2.5 py-1 rounded-md text-xs font-semibold"
-            style={{ background: `${accent}20`, color: accent }}
-            title={`Tested on a ${config.capitalRequirement.minimumUSD.toLocaleString('en-US')} USC cent account`}
-          >
-            {config.capitalRequirement.minimumINR} · {config.direction}
-          </div>
-        </div>
-
-        {/* Key metrics */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-[var(--bg-secondary)] rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp size={12} className="text-[var(--positive)]" />
-              <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">CAGR</span>
-            </div>
-            <span className="font-mono text-base font-semibold text-[var(--positive)]">
-              {formatPercentUnsigned(m.cagr)}
-            </span>
-          </div>
-          <div className="bg-[var(--bg-secondary)] rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Shield size={12} className="text-[var(--negative)]" />
-              <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Max DD</span>
-            </div>
-            <span className="font-mono text-base font-semibold text-[var(--negative)]">
-              {formatPercentUnsigned(m.maxDrawdownPct)}
-            </span>
-          </div>
-          <div className="bg-[var(--bg-secondary)] rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1">
-              <BarChart3 size={12} className="text-[var(--gold)]" />
-              <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Profit Factor</span>
-            </div>
-            <span className="font-mono text-base font-semibold text-[var(--text-primary)]">
-              {formatRatio(m.profitFactor)}
-            </span>
-          </div>
-          <div className="bg-[var(--bg-secondary)] rounded-lg p-3">
-            <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp size={12} className="text-[var(--gold)]" />
-              <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">Trades</span>
-            </div>
-            <span className="font-mono text-base font-semibold text-[var(--text-primary)]">
-              {formatInteger(m.totalTrades)}
-            </span>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-[var(--border)]">
-          <span className="text-xs text-[var(--text-muted)]">
-            {config.testPeriod.startDate} — {config.testPeriod.endDate}
+      <div className="flex-1 flex flex-col p-7 sm:p-8">
+        <div className="flex items-center justify-between gap-3">
+          <span className={dark ? 'eyebrow-dark' : 'eyebrow'}>
+            Tier {tier?.numeral} · {tier?.label}
           </span>
-          <Link href={href} className="flex items-center gap-1 text-sm font-medium text-[var(--gold)] hover:text-[var(--gold-light)] transition-colors">
-            View Details <ArrowRight size={14} />
-          </Link>
+          <span className={`text-[10.5px] font-semibold uppercase tracking-[0.14em] ${muted}`}>{config.direction}</span>
         </div>
+
+        <h3 className="mt-6 font-display text-[32px] leading-none tracking-[-0.01em]">
+          <Link href={`/algos/${config.slug}`} className="after:absolute after:inset-0 after:z-10 focus-visible:outline-none">
+            {config.name}
+          </Link>
+        </h3>
+        <p className={`mt-3 text-sm leading-relaxed ${body}`}>{config.tagline}</p>
+
+        <div className={`mt-7 pt-6 border-t ${rule} flex items-end justify-between gap-5`}>
+          <div className="shrink-0">
+            <div className={labelCls}>Tested balance</div>
+            <div className={`mt-2 font-display text-[46px] leading-[0.9] ${dark ? 'text-gold-soft' : 'text-gold-deep'}`}>
+              {config.capitalRequirement.minimumINR}
+            </div>
+            <div className={`mt-2 text-xs tnum ${muted}`}>{formatInteger(config.capitalRequirement.minimumUSD)} USC</div>
+          </div>
+          <Sparkline
+            data={strategy.equityCurve}
+            id={`card-${config.slug}`}
+            name={config.name}
+            tone={dark ? 'dark' : 'light'}
+            className="h-14 w-full max-w-[150px]"
+          />
+        </div>
+
+        <dl className={`mt-7 pt-5 border-t ${rule} grid grid-cols-3`}>
+          {metrics.map(([label, value], i) => (
+            <div key={label} className={`flex flex-col justify-between gap-1.5 ${i === 0 ? 'pr-3' : `px-3 border-l ${rule}`}`}>
+              <dt className={`${labelCls} text-[10px] tracking-[0.12em]`}>{label}</dt>
+              <dd className="font-display text-[22px] leading-none tnum">{value}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-    </div>
+
+      <div className={`px-7 sm:px-8 py-4 border-t ${rule} flex items-center justify-between gap-3`}>
+        <span className={`text-xs tnum ${muted}`}>
+          {formatDateShort(config.testPeriod.startDate)} to {formatDateShort(config.testPeriod.endDate)}
+        </span>
+        <span className={`link-gold ${dark ? 'text-gold-soft' : ''}`}>
+          View strategy <ArrowUpRight size={14} />
+        </span>
+      </div>
+    </article>
   );
 }

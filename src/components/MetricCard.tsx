@@ -1,7 +1,7 @@
 'use client';
 
+import { useId, useState } from 'react';
 import { Info } from 'lucide-react';
-import { useState } from 'react';
 
 interface MetricCardProps {
   label: string;
@@ -13,43 +13,49 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ label, value, tooltip, trend, size = 'md', className = '' }: MetricCardProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [open, setOpen] = useState(false);
+  const tipId = useId();
 
-  const valueSize = {
-    sm: 'text-base',
-    md: 'text-xl',
-    lg: 'text-2xl',
+  const valueCls = {
+    sm: 'text-base font-semibold',
+    md: 'text-xl font-semibold',
+    lg: 'font-display text-[34px] leading-none',
   }[size];
 
-  const trendColor = trend === 'positive'
-    ? 'text-[var(--positive)]'
-    : trend === 'negative'
-    ? 'text-[var(--negative)]'
-    : 'text-[var(--text-primary)]';
+  const trendColor =
+    trend === 'positive' ? 'text-positive' : trend === 'negative' ? 'text-negative' : 'text-ink';
 
   return (
     <div className={`relative ${className}`}>
-      <div className="flex items-center gap-1 mb-1">
-        <span className="metric-label">{label}</span>
+      <div className="flex items-center gap-1.5 mb-2.5">
+        <span className="label">{label}</span>
         {tooltip && (
-          <div className="relative inline-block">
-            <Info
-              size={12}
-              className="text-[var(--text-muted)] cursor-help"
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-            />
-            {showTooltip && (
-              <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-xs text-[var(--text-secondary)] w-48 shadow-lg">
+          <span className="relative inline-flex">
+            <button
+              type="button"
+              aria-label={`About ${label}`}
+              aria-describedby={open ? tipId : undefined}
+              className="text-ink-3 hover:text-gold-deep transition-colors"
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+              onFocus={() => setOpen(true)}
+              onBlur={() => setOpen(false)}
+            >
+              <Info size={12} />
+            </button>
+            {open && (
+              <span
+                id={tipId}
+                role="tooltip"
+                className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-[4px] bg-espresso px-3 py-2.5 text-xs leading-relaxed text-on-dark shadow-xl"
+              >
                 {tooltip}
-              </div>
+              </span>
             )}
-          </div>
+          </span>
         )}
       </div>
-      <div className={`font-mono font-semibold ${valueSize} ${trendColor} tracking-tight`}>
-        {value}
-      </div>
+      <div className={`tnum tracking-tight ${valueCls} ${trendColor}`}>{value}</div>
     </div>
   );
 }
@@ -67,9 +73,5 @@ export function MetricGrid({ children, columns = 4 }: MetricGridProps) {
     5: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5',
   }[columns];
 
-  return (
-    <div className={`grid ${gridCols} gap-4 sm:gap-6`}>
-      {children}
-    </div>
-  );
+  return <div className={`grid ${gridCols} gap-x-8 gap-y-9`}>{children}</div>;
 }

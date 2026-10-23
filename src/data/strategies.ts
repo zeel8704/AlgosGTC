@@ -5,6 +5,10 @@ import type {
 import { PRODUCT_NAMES } from '@/config/brand';
 import { RAW_DATASETS, type RawDataset, type RawMetrics } from '@/data/dataset';
 
+// Displayed backtest data quality for every strategy (per owner instruction: shown as 100%
+// real ticks site-wide; the raw Mini/Micro report summaries list 99%).
+const HISTORY_QUALITY = '100% real ticks';
+
 // ─── Parsing helpers for report-only (string) fields ────────────────
 
 function pf(s: string | undefined): number | undefined {
@@ -73,7 +77,7 @@ function buildMetrics(m: RawMetrics, raw: RawDataset, scenario: 'original' | 'ad
     avgConsecLosses: 0,
     expectedPayoff: m.expectedPayoff ?? 0,
     avgHoldTime: raw.sourceReported.avgHoldTime ?? 'N/A',
-    // Equity (floating) drawdown is a report-only figure — not recomputable
+    // Equity (floating) drawdown is a report-only figure, not recomputable
     // after excluding a day, so the adjusted view reuses the as-tested value.
     equityDDMaxPct: equityDDPct,
     equityDDMaxAbs: equityDD.abs,
@@ -151,10 +155,10 @@ const CONFIG: Record<string, Omit<StrategyConfig, 'testPeriod' | 'platform'>> = 
       minimumUSD: 1_000_000, recommendedUSD: 1_000_000,
       minimumINR: '10L', recommendedINR: '10L',
       leverage: '1:500', currency: 'USC',
-      note: 'Figures are in account currency (USC) on a cent account — the balance the strategy was tested at. On a cent account, 100 USC = 1 USD. Deploying below the tested balance increases the chance a news-driven floating drawdown exceeds the account.',
+      note: 'Figures are in account currency (USC) on a cent account, at the balance the strategy was tested at. On a cent account, 100 USC = 1 USD. Deploying below the tested balance increases the chance a news-driven floating drawdown exceeds the account.',
     },
     riskClassification: 'Very High',
-    riskCriteria: 'Classified by maximum floating (equity) drawdown in the backtest: ≥70% = Very High, 40–70% = High, <40% = Moderate. This strategy reached 75.4% equity drawdown.',
+    riskCriteria: 'Classified by maximum floating (equity) drawdown in the backtest: ≥70% = Very High, 40 to 70% = High, <40% = Moderate. This strategy reached 75.4% equity drawdown.',
   },
   Mini: {
     id: 'mini', slug: 'mini', name: PRODUCT_NAMES.Mini, shortName: 'Mini',
@@ -168,16 +172,16 @@ const CONFIG: Record<string, Omit<StrategyConfig, 'testPeriod' | 'platform'>> = 
       minimumUSD: 100_000, recommendedUSD: 100_000,
       minimumINR: '1L', recommendedINR: '1L',
       leverage: '1:500', currency: 'USC',
-      note: 'Figures are in account currency (USC) on a cent account (100 USC = 1 USD) — the balance the strategy was tested at. Mini showed the highest floating drawdown of the three (84%); size accordingly.',
+      note: 'Figures are in account currency (USC) on a cent account (100 USC = 1 USD), at the balance the strategy was tested at. Mini showed the highest floating drawdown of the three (84%); size accordingly.',
     },
     riskClassification: 'Very High',
-    riskCriteria: 'Classified by maximum floating (equity) drawdown in the backtest: ≥70% = Very High, 40–70% = High, <40% = Moderate. This strategy reached 84.0% equity drawdown.',
+    riskCriteria: 'Classified by maximum floating (equity) drawdown in the backtest: ≥70% = Very High, 40 to 70% = High, <40% = Moderate. This strategy reached 84.0% equity drawdown.',
   },
   Micro: {
     id: 'micro', slug: 'micro', name: PRODUCT_NAMES.Micro, shortName: 'Micro',
     tagline: 'Accessible mean-reversion gold strategy, specified for a 3L account',
     description:
-      'An accessible XAUUSD mean-reversion strategy specified for a 300,000 USC (3L) cent account. Figures are rebased from a 500,000 USC source backtest — absolute P&L and drawdowns are unchanged, while percentage returns and drawdowns scale to the 3L base.',
+      'An accessible XAUUSD mean-reversion strategy specified for a 300,000 USC (3L) cent account. Figures are rebased from a 500,000 USC source backtest. Absolute P&L and drawdowns are unchanged, while percentage returns and drawdowns scale to the 3L base.',
     direction: 'Long & short',
     strategyFamily: 'Mean reversion',
     keyParameters: [],
@@ -185,10 +189,10 @@ const CONFIG: Record<string, Omit<StrategyConfig, 'testPeriod' | 'platform'>> = 
       minimumUSD: 300_000, recommendedUSD: 300_000,
       minimumINR: '3L', recommendedINR: '3L',
       leverage: '1:500', currency: 'USC',
-      note: 'Specified for a 300,000 USC (3L) cent account (100 USC = 1 USD). The source backtest ran at 500,000 USC; because the strategy trades a fixed position size, the trade sequence is identical and only rebased. At 3L the worst floating drawdown is ~78% of equity (min equity stayed positive in testing) — a thinner safety margin than the 5L test, so treat 3L as a floor, not a comfortable size.',
+      note: 'Specified for a 300,000 USC (3L) cent account (100 USC = 1 USD). The source backtest ran at 500,000 USC; because the strategy trades a fixed position size, the trade sequence is identical and only rebased. At 3L the worst floating drawdown is ~78% of equity (min equity stayed positive in testing), a thinner safety margin than the 5L test, so treat 3L as a floor, not a comfortable size.',
     },
     riskClassification: 'Very High',
-    riskCriteria: 'Classified by maximum floating (equity) drawdown: ≥70% = Very High, 40–70% = High, <40% = Moderate. Rebased to a 300,000 USC account the max floating drawdown is ~78% (it was 58.9% at the 500,000 tested balance).',
+    riskCriteria: 'Classified by maximum floating (equity) drawdown: ≥70% = Very High, 40 to 70% = High, <40% = Moderate. Rebased to a 300,000 USC account the max floating drawdown is ~78% (it was 58.9% at the 500,000 tested balance).',
   },
 };
 
@@ -219,7 +223,7 @@ function build(key: string): StrategyData {
       startDate: raw.period.start.slice(0, 10).replace(/\./g, '-'),
       endDate: raw.period.end.slice(0, 10).replace(/\./g, '-'),
       type: 'backtest',
-      historyQuality: raw.sourceReported.historyQuality ?? 'N/A',
+      historyQuality: HISTORY_QUALITY,
       spanDays: Math.round(raw.period.years * 365.25),
       spanYears: raw.period.years,
     },
@@ -249,7 +253,7 @@ function build(key: string): StrategyData {
       reportType: 'MT5 Strategy Tester (100% real ticks)',
       reportDate: raw.period.end.slice(0, 10).replace(/\./g, '-'),
       version: raw.expert,
-      historyQuality: raw.sourceReported.historyQuality ?? 'N/A',
+      historyQuality: HISTORY_QUALITY,
     },
   };
 }

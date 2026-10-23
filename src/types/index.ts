@@ -18,7 +18,7 @@ export interface StrategyConfig {
 }
 
 export interface CapitalRequirement {
-  minimumUSD: number;       // amount in account currency (USC — cent account)
+  minimumUSD: number;       // amount in account currency (USC, cent account)
   recommendedUSD: number;
   minimumINR: string;       // lakh shorthand label, e.g. "1L", "5L", "10L"
   recommendedINR: string;
@@ -138,7 +138,7 @@ export interface ComparisonMetric {
   key: MetricKey;
   label: string;
   description: string;
-  format: 'currency' | 'percentage' | 'number' | 'ratio' | 'time';
+  format: 'currency' | 'percentage' | 'number' | 'integer' | 'ratio' | 'time';
   higherIsBetter?: boolean;
 }
 

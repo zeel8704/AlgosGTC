@@ -2,64 +2,65 @@
 // Change these values to rebrand the entire site.
 
 export const BRAND = {
-  name: 'Aurum Quant',
-  tagline: 'Systematic Gold Trading',
-  description: 'Quantitative XAUUSD algorithmic trading systems with documented performance.',
-  url: 'https://aurumquant.com',
+  name: 'Golden Teak Capital',
+  shortName: 'Golden Teak',
+  tagline: 'Systematic Gold Strategies',
+  description:
+    'Golden Teak Capital: systematic XAUUSD mean-reversion strategies with documented, real-tick backtest performance.',
+  // Placeholder contact details; replace with the firm's real domain/handles before launch.
+  url: 'https://goldenteakcapital.com',
   contact: {
-    email: 'contact@aurumquant.com',
-    telegram: '@aurumquant',
+    email: 'contact@goldenteakcapital.com',
+    telegram: '@goldenteakcapital',
   },
   legal: {
-    companyName: 'Aurum Quant Technologies',
+    companyName: 'Golden Teak Capital',
     jurisdiction: 'Not specified',
   },
 } as const;
 
+// Palette taken from the Golden Teak Capital logo: cream paper, espresso ink, teak gold.
+// The same values are exposed to Tailwind as theme tokens in globals.css; charts read them here.
 export const THEME = {
   colors: {
-    // Deep navy backgrounds
-    bgPrimary: '#0a0e1a',
-    bgSecondary: '#0f1628',
-    bgTertiary: '#141c33',
-    bgCard: '#161e35',
-    bgCardHover: '#1a2440',
-    // Gold accents
-    gold: '#c8a853',
-    goldLight: '#dfc06e',
-    goldDark: '#a68a3a',
-    goldMuted: 'rgba(200, 168, 83, 0.15)',
-    // Text
-    textPrimary: '#e8e6e1',
-    textSecondary: '#8b95a8',
-    textMuted: '#5a6478',
-    // Status
-    positive: '#34d399',
-    negative: '#f87171',
-    warning: '#fbbf24',
-    info: '#60a5fa',
-    // Borders
-    border: 'rgba(200, 168, 83, 0.12)',
-    borderHover: 'rgba(200, 168, 83, 0.25)',
+    cream: '#F4EDE2',
+    ivory: '#FBF8F2',
+    sand: '#EDE3D3',
+    line: '#E2D6C2',
+    lineStrong: '#CDBB9C',
+    ink: '#3A2416',
+    ink2: '#6B5444',
+    ink3: '#7A6453',
+    gold: '#A9822E',
+    goldDeep: '#8A6420',
+    goldSoft: '#C9A35A',
+    espresso: '#2B1A10',
+    positive: '#3F6B3A',
+    negative: '#A1452F',
   },
 } as const;
 
 export const PRODUCT_NAMES: Record<string, string> = {
-  Standard: 'Aurum Standard',
-  Mini: 'Aurum Mini',
-  Micro: 'Aurum Micro',
+  Standard: 'GTC Standard',
+  Mini: 'GTC Mini',
+  Micro: 'GTC Micro',
+};
+
+// Positioning label for each tier (ascending by capital).
+export const TIER_LABELS: Record<string, { numeral: string; label: string }> = {
+  Mini: { numeral: 'I', label: 'Entry' },
+  Micro: { numeral: 'II', label: 'Growth' },
+  Standard: { numeral: 'III', label: 'Flagship' },
 };
 
 export const ALGO_ORDER = ['Mini', 'Micro', 'Standard'] as const;
 
 export const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/algos', label: 'Algo Portfolio' },
+  { href: '/algos', label: 'Strategies' },
   { href: '/contact', label: 'Contact' },
 ] as const;
 
 export const RISK_DISCLAIMER = `Past performance, whether from historical backtesting or forward testing, does not guarantee future results. Algorithmic trading involves substantial risk of loss and is not suitable for every investor. The performance data presented has been obtained from strategy tester reports on demo accounts using historical tick data. Actual trading results may differ materially due to slippage, spread variations, broker execution quality, market conditions, and other factors not fully captured in testing. Capital requirements stated are for informational purposes and do not constitute a guarantee of account safety. Never risk capital you cannot afford to lose.`;
-
-export const METHODOLOGY_NOTE = `All performance data is derived from MetaTrader 5 Strategy Tester reports using 100% real tick data on Vantage Markets accounts. Figures are shown in account currency (USC) — these are cent accounts, where 100 USC = 1 USD; values are presented exactly as reported, without currency conversion. The adjusted metrics exclude the single deepest balance-drawdown day from each strategy's backtest — a news-driven event the EA's mobile-pause control is intended to sit out in live trading — and recompute every metric from the remaining deals. Both as-tested and adjusted metrics are presented side by side. These are backtest results, not live or forward-tested trading.`;
 
 export const CENT_ACCOUNT_NOTE = `Balances and P&L are quoted in USC (US cents) on a cent account. 100 USC = 1 USD. Values are shown exactly as the reports state them, with no conversion applied.`;

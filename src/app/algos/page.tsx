@@ -3,116 +3,125 @@ import Link from 'next/link';
 import { getAllStrategies } from '@/data/strategies';
 import { StrategyCard } from '@/components/StrategyCard';
 import { ComparisonTable } from '@/components/tables/ComparisonTable';
-import { formatCurrency, formatPercentUnsigned, formatRatio } from '@/lib/formatters';
-import { BRAND, CENT_ACCOUNT_NOTE } from '@/config/brand';
-import { ArrowRight } from 'lucide-react';
+import { SectionHeading } from '@/components/SectionHeading';
+import { formatInteger } from '@/lib/formatters';
+import { CENT_ACCOUNT_NOTE, TIER_LABELS } from '@/config/brand';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: `Algo Portfolio — ${BRAND.name}`,
-  description: 'Three XAUUSD algorithmic strategies with documented backtest performance, risk metrics and capital requirements.',
+  title: 'Strategies',
+  description:
+    'The GTC strategy suite: three XAUUSD mean-reversion strategies with documented backtest performance and capital requirements.',
 };
+
+const container = 'max-w-7xl mx-auto px-5 sm:px-8 lg:px-10';
 
 export default function AlgosPage() {
   const strategies = getAllStrategies();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <>
       {/* Header */}
-      <div className="max-w-3xl mb-12">
-        <p className="text-xs font-medium text-[var(--gold)] uppercase tracking-wider mb-3">Algo Portfolio</p>
-        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4">
-          Three systematic XAUUSD strategies
-        </h1>
-        <p className="text-[var(--text-secondary)] leading-relaxed">
-          Each algorithm is an independent MetaTrader 5 Expert Advisor, backtested on 100% real tick
-          data over the same ~2.7-year window. They share a common systematic approach but differ in
-          direction, risk and the account size they were tested at. Every figure below is taken from, or
-          reconciled to, the source Strategy Tester reports.
-        </p>
-      </div>
-
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-        {strategies.map((s) => (
-          <StrategyCard key={s.config.id} strategy={s} />
-        ))}
-      </div>
-
-      {/* Capital comparison */}
-      <section className="mb-16">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Capital requirements</h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-6 max-w-2xl">{CENT_ACCOUNT_NOTE}</p>
-        <div className="card card-inner table-scroll">
-          <table className="w-full border-collapse min-w-[640px]">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-left">
-                <th className="py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Strategy</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Tested balance</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Label</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Direction</th>
-                <th className="py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Leverage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {strategies.map((s) => (
-                <tr key={s.config.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition-colors">
-                  <td className="py-4 px-4">
-                    <Link href={`/algos/${s.config.slug}`} className="font-semibold text-[var(--text-primary)] hover:text-[var(--gold)]">
-                      {s.config.name}
-                    </Link>
-                  </td>
-                  <td className="py-4 px-4 font-mono text-sm text-[var(--text-primary)]">{formatCurrency(s.config.capitalRequirement.minimumUSD, { decimals: 0 })}</td>
-                  <td className="py-4 px-4 font-mono text-sm text-[var(--gold)]">{s.config.capitalRequirement.minimumINR}</td>
-                  <td className="py-4 px-4 text-sm text-[var(--text-secondary)]">{s.config.direction}</td>
-                  <td className="py-4 px-4 font-mono text-sm text-[var(--text-secondary)]">{s.config.capitalRequirement.leverage}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="paper border-b border-line">
+        <div className={`${container} pt-12 pb-16 lg:pt-16 lg:pb-20`}>
+          <p className="eyebrow rise">Strategies</p>
+          <h1 className="mt-6 max-w-4xl font-display text-[48px] sm:text-[72px] leading-[0.98] tracking-[-0.025em] text-ink rise rise-1">
+            The GTC <em className="text-gold-deep">strategy suite.</em>
+          </h1>
+          <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink-2 rise rise-2">
+            Three independent MetaTrader 5 strategies for XAUUSD, backtested on 100% real tick data over the same
+            ~2.7-year window. They share a mean-reversion discipline and differ in the account size they were built for.
+            Every figure is taken from, or reconciled to, the source Strategy Tester reports.
+          </p>
         </div>
-        <p className="text-[10px] text-[var(--text-muted)] mt-3">
-          Different cent-account balances are not directly comparable as &ldquo;cost&rdquo;; they are the balances each
-          system was tested at.
-        </p>
       </section>
 
-      {/* Full comparison */}
-      <section className="mb-16">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">Head-to-head metrics</h2>
-        <div className="card card-inner">
+      {/* Cards */}
+      <section className={`${container} py-20`}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {strategies.map((s) => (
+            <StrategyCard key={s.config.id} strategy={s} featured={s.config.shortName === 'Standard'} />
+          ))}
+        </div>
+      </section>
+
+      {/* Capital requirements */}
+      <section className="bg-sand/60 border-y border-line">
+        <div className={`${container} py-24`}>
+          <SectionHeading eyebrow="Capital" title="Capital requirements" description={CENT_ACCOUNT_NOTE} />
+          <div className="mt-12 card p-5 sm:p-8">
+            <div className="table-scroll">
+              <table className="w-full min-w-[640px] border-collapse">
+                <thead>
+                  <tr className="border-b border-ink/80 text-left">
+                    {['Tier', 'Strategy', 'Tested balance', 'Label', 'Direction', 'Leverage'].map((h) => (
+                      <th key={h} scope="col" className="py-3 pr-6 label text-[10px] last:pr-0">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {strategies.map((s) => {
+                    const tier = TIER_LABELS[s.config.shortName];
+                    return (
+                      <tr key={s.config.id} className="border-b border-line last:border-0 hover:bg-sand/40 transition-colors">
+                        <td className="py-5 pr-6 font-display italic text-xl text-gold">{tier?.numeral}</td>
+                        <th scope="row" className="py-5 pr-6 text-left font-normal">
+                          <Link href={`/algos/${s.config.slug}`} className="font-display text-lg text-ink hover:text-gold-deep transition-colors">
+                            {s.config.name}
+                          </Link>
+                          <div className="text-[11px] text-ink-3">{tier?.label}</div>
+                        </th>
+                        <td className="py-5 pr-6 text-sm tnum text-ink">{formatInteger(s.config.capitalRequirement.minimumUSD)} USC</td>
+                        <td className="py-5 pr-6 font-display text-xl text-gold-deep">{s.config.capitalRequirement.minimumINR}</td>
+                        <td className="py-5 pr-6 text-sm text-ink-2">{s.config.direction}</td>
+                        <td className="py-5 text-sm tnum text-ink-2">{s.config.capitalRequirement.leverage}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-5 text-[11px] leading-relaxed text-ink-3">
+              Different cent-account balances are not directly comparable as &ldquo;cost&rdquo;; they are the balances each
+              system was tested at.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison */}
+      <section className={`${container} py-24`}>
+        <SectionHeading
+          eyebrow="Head-to-head"
+          title="Every figure, side by side."
+          description="Add or remove columns and sort by any metric to compare the tiers on your own terms."
+        />
+        <div className="mt-12 card p-5 sm:p-8">
           <ComparisonTable strategies={strategies} />
         </div>
       </section>
 
-      {/* Quick performance snapshot */}
-      <section className="mb-4">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">At a glance (as-tested)</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {strategies.map((s) => (
-            <div key={s.config.id} className="card card-inner">
-              <h3 className="text-base font-semibold text-[var(--text-primary)] mb-4">{s.config.name}</h3>
-              <dl className="space-y-2 text-sm">
-                {[
-                  ['CAGR', formatPercentUnsigned(s.originalMetrics.cagr), 'text-[var(--positive)]'],
-                  ['Net profit', formatCurrency(s.originalMetrics.totalNetProfit, { compact: true }), 'text-[var(--positive)]'],
-                  ['Max balance DD', formatPercentUnsigned(s.originalMetrics.maxDrawdownPct), 'text-[var(--negative)]'],
-                  ['Max equity DD', formatPercentUnsigned(s.originalMetrics.equityDDMaxPct), 'text-[var(--negative)]'],
-                  ['Profit factor', formatRatio(s.originalMetrics.profitFactor), 'text-[var(--text-primary)]'],
-                  ['MAR ratio', formatRatio(s.originalMetrics.marRatio), 'text-[var(--text-primary)]'],
-                ].map(([label, value, color]) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <dt className="text-[var(--text-secondary)]">{label}</dt>
-                    <dd className={`font-mono font-medium ${color}`}>{value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <Link href={`/algos/${s.config.slug}`} className="btn-secondary w-full justify-center mt-5 text-sm">
-                Full performance <ArrowRight size={14} />
-              </Link>
-            </div>
-          ))}
+      {/* CTA */}
+      <section className={`${container} pb-24`}>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 border-t border-ink/80 pt-12">
+          <div>
+            <h2 className="font-display text-3xl sm:text-4xl text-ink">
+              Not sure which tier fits? <em className="text-gold-deep">Ask us.</em>
+            </h2>
+            <p className="mt-3 text-ink-2">We&rsquo;ll match a strategy to your capital, broker and risk tolerance.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link href="/contact" className="btn btn-dark">
+              Request evaluation <ArrowRight size={14} />
+            </Link>
+            <Link href="/#approach" className="btn btn-outline">
+              Our approach <ArrowUpRight size={14} />
+            </Link>
+          </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

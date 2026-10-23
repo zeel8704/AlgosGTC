@@ -87,7 +87,7 @@ function parseYMD(dateStr: string): [number, number, number] | null {
   return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
 }
 
-// Deterministic across server/client (no Date, no locale) — avoids hydration drift.
+// Deterministic across server/client (no Date, no locale); avoids hydration drift.
 export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return 'N/A';
   const p = parseYMD(dateStr);

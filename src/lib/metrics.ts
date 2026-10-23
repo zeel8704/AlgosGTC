@@ -8,7 +8,7 @@ export const COMPARISON_METRICS: ComparisonMetric[] = [
   {
     key: 'cagr',
     label: 'CAGR',
-    description: 'Compound Annual Growth Rate — the annualized return over the test period.',
+    description: 'Compound Annual Growth Rate: the annualized return over the test period.',
     format: 'percentage',
     higherIsBetter: true,
   },
@@ -23,6 +23,13 @@ export const COMPARISON_METRICS: ComparisonMetric[] = [
     key: 'maxDrawdownPct',
     label: 'Max Drawdown',
     description: 'Largest peak-to-trough balance decline as a percentage. Lower is better.',
+    format: 'percentage',
+    higherIsBetter: false,
+  },
+  {
+    key: 'equityDDMaxPct',
+    label: 'Max Equity DD',
+    description: 'Largest floating (unrealized) drawdown of account equity during the test. Lower is better.',
     format: 'percentage',
     higherIsBetter: false,
   },
@@ -51,7 +58,7 @@ export const COMPARISON_METRICS: ComparisonMetric[] = [
     key: 'totalTrades',
     label: 'Total Trades',
     description: 'Number of closed round-trip trades during the test period.',
-    format: 'number',
+    format: 'integer',
   },
   {
     key: 'sharpeRatio',
@@ -120,10 +127,8 @@ export const DEFAULT_COMPARISON_KEYS: string[] = [
   'cagr',
   'totalNetProfit',
   'maxDrawdownPct',
-  'marRatio',
+  'equityDDMaxPct',
   'profitFactor',
   'winRate',
   'totalTrades',
-  'sharpeRatio',
-  'recoveryFactor',
 ];

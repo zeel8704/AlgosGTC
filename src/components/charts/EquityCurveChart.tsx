@@ -1,136 +1,102 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend,
-} from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import type { EquityPoint } from '@/types';
-import { formatCurrency, formatMonthYear } from '@/lib/formatters';
+import { THEME } from '@/config/brand';
+import { formatCurrency, formatDate, formatMonthYear } from '@/lib/formatters';
 
 interface EquityCurveChartProps {
   data: EquityPoint[];
-  adjustedData?: EquityPoint[];
-  showAdjusted?: boolean;
-  normalized?: boolean;
-  color?: string;
-  adjustedColor?: string;
   label?: string;
-  adjustedLabel?: string;
   height?: number;
 }
 
-export function EquityCurveChart({
-  data,
-  adjustedData,
-  showAdjusted = false,
-  normalized = false,
-  color = '#c8a853',
-  adjustedColor = '#34d399',
-  label = 'Balance',
-  adjustedLabel = 'Adjusted',
-  height = 360,
-}: EquityCurveChartProps) {
-  const chartData = useMemo(() => {
-    if (!data.length) return [];
+const C = THEME.colors;
 
-    const baseVal = data[0]?.balance || 1;
-    const adjBaseVal = adjustedData?.[0]?.balance || 1;
+interface TooltipPayload {
+  active?: boolean;
+  payload?: { value: number; payload: { date: string } }[];
+}
 
-    // Merge original and adjusted by date
-    const dateMap = new Map<string, Record<string, number>>();
+function ChartTooltip({ active, payload, seriesName }: TooltipPayload & { seriesName: string }) {
+  if (!active || !payload?.length) return null;
+  const point = payload[0];
+  return (
+    <div className="rounded-[4px] bg-espresso px-3.5 py-2.5 shadow-xl">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-on-dark-2">
+        {formatDate(point.payload.date)}
+      </div>
+      <div className="mt-1 flex items-center gap-2 text-sm text-on-dark tnum">
+        <span className="h-2 w-2 rounded-full" style={{ background: C.goldSoft }} />
+        <span className="text-on-dark-2">{seriesName}</span>
+        <span className="font-semibold">{formatCurrency(point.value)}</span>
+      </div>
+    </div>
+  );
+}
 
-    data.forEach((pt) => {
-      const val = normalized ? (pt.balance / baseVal) * 100 : pt.balance;
-      dateMap.set(pt.date, { ...dateMap.get(pt.date), original: val });
-    });
-
-    if (showAdjusted && adjustedData) {
-      adjustedData.forEach((pt) => {
-        const val = normalized ? (pt.balance / adjBaseVal) * 100 : pt.balance;
-        const existing = dateMap.get(pt.date) || {};
-        dateMap.set(pt.date, { ...existing, adjusted: val });
-      });
-    }
-
-    return Array.from(dateMap.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, vals]) => ({
-        date,
-        displayDate: formatMonthYear(date),
-        ...vals,
-      }));
-  }, [data, adjustedData, showAdjusted, normalized]);
+export function EquityCurveChart({ data, label = 'Balance', height = 360 }: EquityCurveChartProps) {
+  const chartData = useMemo(
+    () =>
+      [...data]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .map((pt) => ({ date: pt.date, displayDate: formatMonthYear(pt.date), balance: pt.balance })),
+    [data],
+  );
 
   if (!chartData.length) {
     return (
-      <div className="flex items-center justify-center h-64 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)]">
-        <p className="text-sm text-[var(--text-muted)]">
-          Equity curve data not yet available. Processing backtest reports...
-        </p>
+      <div className="flex items-center justify-center h-64 rounded-[4px] border border-dashed border-line-strong bg-sand/50">
+        <p className="text-sm text-ink-3">Balance history is not available for this strategy.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ height }}>
+    <div style={{ height }} role="img" aria-label={`${label} over the backtest period`}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(200, 168, 83, 0.08)" />
+        <AreaChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="equity-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={C.gold} stopOpacity={0.24} />
+              <stop offset="100%" stopColor={C.gold} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} stroke={C.line} strokeDasharray="0" />
           <XAxis
             dataKey="displayDate"
-            tick={{ fill: '#5a6478', fontSize: 11 }}
+            tick={{ fill: C.ink3, fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: 'rgba(200, 168, 83, 0.12)' }}
+            axisLine={{ stroke: C.lineStrong }}
             interval="preserveStartEnd"
+            minTickGap={48}
+            tickMargin={10}
           />
           <YAxis
-            tick={{ fill: '#5a6478', fontSize: 11 }}
+            tick={{ fill: C.ink3, fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: 'rgba(200, 168, 83, 0.12)' }}
-            tickFormatter={(v) => normalized ? `${v.toFixed(0)}%` : formatCurrency(v, { compact: true })}
-            width={70}
+            axisLine={false}
+            tickFormatter={(v: number) => formatCurrency(v, { compact: true }).replace(' USC', '')}
+            width={56}
+            tickMargin={6}
           />
           <Tooltip
-            contentStyle={{
-              background: '#0f1628',
-              border: '1px solid rgba(200, 168, 83, 0.2)',
-              borderRadius: '8px',
-              fontSize: '12px',
-              color: '#e8e6e1',
-            }}
-            labelStyle={{ color: '#8b95a8' }}
-            formatter={(value, name) => {
-              const v = Number(value);
-              return [
-                normalized ? `${v.toFixed(2)}%` : formatCurrency(v),
-                name === 'original' ? label : adjustedLabel,
-              ];
-            }}
+            content={<ChartTooltip seriesName={label} />}
+            cursor={{ stroke: C.ink3, strokeWidth: 1, strokeDasharray: '3 3' }}
           />
-          {showAdjusted && <Legend wrapperStyle={{ fontSize: '12px', color: '#8b95a8' }} />}
-          <Line
+          <Area
             type="monotone"
-            dataKey="original"
+            dataKey="balance"
             name={label}
-            stroke={color}
+            stroke={C.goldDeep}
             strokeWidth={2}
+            fill="url(#equity-fill)"
             dot={false}
-            activeDot={{ r: 4, fill: color }}
+            activeDot={{ r: 5, fill: C.goldDeep, stroke: C.ivory, strokeWidth: 2 }}
+            isAnimationActive={false}
           />
-          {showAdjusted && (
-            <Line
-              type="monotone"
-              dataKey="adjusted"
-              name={adjustedLabel}
-              stroke={adjustedColor}
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5 3"
-              activeDot={{ r: 4, fill: adjustedColor }}
-            />
-          )}
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

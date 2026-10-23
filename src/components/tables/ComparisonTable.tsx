@@ -1,33 +1,50 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { StrategyData, PerformanceMetrics } from '@/types';
 import { COMPARISON_METRICS, DEFAULT_COMPARISON_KEYS } from '@/lib/metrics';
 import { formatMetric } from '@/lib/formatters';
-import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, Info, Settings2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpRight, ChevronsUpDown, SlidersHorizontal, Check } from 'lucide-react';
 
 interface ComparisonTableProps {
   strategies: StrategyData[];
 }
 
+const value = (s: StrategyData, key: string) => s.originalMetrics[key as keyof PerformanceMetrics];
+
 export function ComparisonTable({ strategies }: ComparisonTableProps) {
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(DEFAULT_COMPARISON_KEYS);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
-  const [showMetricPicker, setShowMetricPicker] = useState(false);
-  const [tooltipMetric, setTooltipMetric] = useState<string | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
 
   const visibleMetrics = COMPARISON_METRICS.filter((m) => selectedMetrics.includes(m.key));
 
-  // Sort strategies
   const sorted = [...strategies].sort((a, b) => {
     if (!sortKey) return 0;
-    const aVal = a.originalMetrics[sortKey as keyof PerformanceMetrics];
-    const bVal = b.originalMetrics[sortKey as keyof PerformanceMetrics];
-    if (typeof aVal !== 'number' || typeof bVal !== 'number') return 0;
-    return sortDir === 'desc' ? bVal - aVal : aVal - bVal;
+    const av = value(a, sortKey);
+    const bv = value(b, sortKey);
+    if (typeof av !== 'number' || typeof bv !== 'number') return 0;
+    return sortDir === 'desc' ? bv - av : av - bv;
   });
+
+  // Best value per column, for metrics with a clear direction.
+  const best = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const m of COMPARISON_METRICS) {
+      if (m.higherIsBetter === undefined) continue;
+      let winner: StrategyData | null = null;
+      for (const s of strategies) {
+        const v = value(s, m.key);
+        if (typeof v !== 'number') continue;
+        const w = winner ? value(winner, m.key) : null;
+        if (typeof w !== 'number' || (m.higherIsBetter ? v > w : v < w)) winner = s;
+      }
+      if (winner) out[m.key] = winner.config.id;
+    }
+    return out;
+  }, [strategies]);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -39,124 +56,125 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
     }
   };
 
-  const toggleMetric = (key: string) => {
-    setSelectedMetrics((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
-  };
+  const toggleMetric = (key: string) =>
+    setSelectedMetrics((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 
   return (
     <div>
-      {/* Metric picker toggle */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-[var(--text-primary)]">Strategy Comparison</h3>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <p className="text-xs text-ink-3 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-gold" aria-hidden="true" />
+          Marks the strongest figure in each column. Select a column header to sort.
+        </p>
         <button
-          onClick={() => setShowMetricPicker(!showMetricPicker)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--gold)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-card)] border border-[var(--border)] transition-colors"
+          onClick={() => setShowPicker((v) => !v)}
+          aria-expanded={showPicker}
+          className="inline-flex items-center gap-2 rounded-[2px] border border-line-strong px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-2 hover:border-ink hover:text-ink transition-colors"
         >
-          <Settings2 size={14} /> Customize Metrics
+          <SlidersHorizontal size={13} /> Columns
         </button>
       </div>
 
-      {/* Metric picker */}
-      {showMetricPicker && (
-        <div className="mb-4 p-4 bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl">
-          <p className="text-xs text-[var(--text-muted)] mb-3">Select metrics to display:</p>
+      {showPicker && (
+        <div className="mb-5 rounded-[4px] border border-line bg-sand/50 p-4">
+          <p className="label mb-3">Show metrics</p>
           <div className="flex flex-wrap gap-2">
-            {COMPARISON_METRICS.map((m) => (
-              <button
-                key={m.key}
-                onClick={() => toggleMetric(m.key)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                  selectedMetrics.includes(m.key)
-                    ? 'bg-[var(--gold-muted)] text-[var(--gold)] border border-[var(--gold)]'
-                    : 'bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border)] hover:text-[var(--text-secondary)]'
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
+            {COMPARISON_METRICS.map((m) => {
+              const on = selectedMetrics.includes(m.key);
+              return (
+                <button
+                  key={m.key}
+                  onClick={() => toggleMetric(m.key)}
+                  aria-pressed={on}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    on ? 'border-ink bg-ink text-on-dark' : 'border-line-strong bg-ivory text-ink-2 hover:border-ink-2'
+                  }`}
+                >
+                  {on && <Check size={12} />}
+                  {m.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Table */}
       <div className="table-scroll">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-[var(--border)]">
-              <th className="text-left py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider sticky left-0 bg-[var(--bg-card)] z-10">
-                Algorithm
+            <tr className="border-b border-ink/80">
+              <th scope="col" className="sticky left-0 z-10 bg-ivory py-3 pr-4 text-left label text-[10px]">
+                Strategy
               </th>
-              {visibleMetrics.map((m) => (
-                <th
-                  key={m.key}
-                  className="text-right py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider cursor-pointer hover:text-[var(--gold)] transition-colors whitespace-nowrap"
-                  onClick={() => handleSort(m.key)}
-                >
-                  <div className="flex items-center justify-end gap-1 relative"
-                    onMouseEnter={() => setTooltipMetric(m.key)}
-                    onMouseLeave={() => setTooltipMetric(null)}
+              {visibleMetrics.map((m) => {
+                const active = sortKey === m.key;
+                return (
+                  <th
+                    key={m.key}
+                    scope="col"
+                    aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
+                    className="py-3 px-3 text-right whitespace-nowrap"
                   >
-                    <Info size={10} className="text-[var(--text-muted)] opacity-50" />
-                    {m.label}
-                    {sortKey === m.key ? (
-                      sortDir === 'desc' ? <ArrowDown size={12} /> : <ArrowUp size={12} />
-                    ) : (
-                      <ArrowUpDown size={12} className="opacity-30" />
-                    )}
-                    {tooltipMetric === m.key && (
-                      <div className="absolute z-50 top-full right-0 mt-1 px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-[10px] text-[var(--text-secondary)] w-44 shadow-lg font-normal normal-case tracking-normal">
-                        {m.description}
-                      </div>
-                    )}
-                  </div>
-                </th>
-              ))}
-              <th className="text-right py-3 px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                Capital
-              </th>
-              <th className="py-3 px-4" />
+                    <button
+                      onClick={() => handleSort(m.key)}
+                      title={m.description}
+                      className={`inline-flex items-center gap-1 label text-[10px] tracking-[0.1em] hover:text-ink transition-colors ${
+                        active ? 'text-ink' : ''
+                      }`}
+                    >
+                      {m.label}
+                      {active ? (
+                        sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />
+                      ) : (
+                        <ChevronsUpDown size={11} className="opacity-40" />
+                      )}
+                    </button>
+                  </th>
+                );
+              })}
+              <th scope="col" className="py-3 px-3 text-right label text-[10px] tracking-[0.1em] whitespace-nowrap">Capital</th>
+              <th scope="col" className="py-3 pl-2"><span className="sr-only">Open</span></th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((s) => (
-              <tr
-                key={s.config.id}
-                className="border-b border-[var(--border)] hover:bg-[var(--bg-card-hover)] transition-colors"
-              >
-                <td className="py-4 px-4 sticky left-0 bg-[var(--bg-card)] group-hover:bg-[var(--bg-card-hover)] z-10">
-                  <Link href={`/algos/${s.config.slug}`} className="font-semibold text-[var(--text-primary)] hover:text-[var(--gold)] transition-colors">
+              <tr key={s.config.id} className="group border-b border-line hover:bg-sand/40 transition-colors">
+                <th scope="row" className="sticky left-0 z-10 bg-ivory group-hover:bg-[#F6F0E6] py-5 pr-4 text-left font-normal transition-colors">
+                  <Link href={`/algos/${s.config.slug}`} className="font-display text-lg text-ink hover:text-gold-deep transition-colors whitespace-nowrap">
                     {s.config.name}
                   </Link>
-                  <p className="text-[10px] text-[var(--text-muted)]">
-                    {s.config.platform.symbol} · {s.config.testPeriod.type}
-                  </p>
-                </td>
+                  <div className="mt-0.5 text-[11px] text-ink-3 whitespace-nowrap">{s.config.direction}</div>
+                </th>
                 {visibleMetrics.map((m) => {
-                  const val = s.originalMetrics[m.key as keyof PerformanceMetrics];
-                  const formatted = formatMetric(val as number, m.format);
-                  let color = 'text-[var(--text-primary)]';
-                  if (m.key === 'maxDrawdownPct' || m.key === 'maxDrawdownAbs' || m.key === 'grossLoss' || m.key === 'largestLossTrade') {
-                    color = 'text-[var(--negative)]';
-                  } else if (m.key === 'cagr' || m.key === 'totalNetProfit') {
-                    color = typeof val === 'number' && val > 0 ? 'text-[var(--positive)]' : 'text-[var(--negative)]';
-                  }
+                  const v = value(s, m.key);
+                  const isBest = best[m.key] === s.config.id;
                   return (
-                    <td key={m.key} className={`text-right py-4 px-4 font-mono text-sm font-medium ${color}`}>
-                      {formatted}
+                    <td key={m.key} className="py-5 px-3 text-right text-sm tnum text-ink whitespace-nowrap">
+                      <span className="inline-flex items-center gap-2">
+                        {isBest && (
+                          <>
+                            <span className="h-1.5 w-1.5 rounded-full bg-gold" aria-hidden="true" />
+                            <span className="sr-only">Best: </span>
+                          </>
+                        )}
+                        <span className={isBest ? 'font-semibold' : ''}>{formatMetric(v as number, m.format)}</span>
+                      </span>
                     </td>
                   );
                 })}
-                <td className="text-right py-4 px-4 text-sm font-medium text-[var(--text-primary)]">
-                  <div className="font-mono">{s.config.capitalRequirement.minimumINR}</div>
-                  <div className="text-[10px] text-[var(--text-muted)]">
+                <td className="py-5 px-3 text-right whitespace-nowrap">
+                  <div className="font-display text-lg text-gold-deep leading-none">{s.config.capitalRequirement.minimumINR}</div>
+                  <div className="mt-1 text-[11px] text-ink-3 tnum">
                     {s.config.capitalRequirement.minimumUSD.toLocaleString('en-US')} USC
                   </div>
                 </td>
-                <td className="py-4 px-4">
-                  <Link href={`/algos/${s.config.slug}`} className="text-[var(--gold)] hover:text-[var(--gold-light)] transition-colors">
-                    <ExternalLink size={16} />
+                <td className="py-5 pl-2 text-right">
+                  <Link
+                    href={`/algos/${s.config.slug}`}
+                    aria-label={`Open ${s.config.name}`}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-line-strong text-ink-2 hover:border-ink hover:bg-ink hover:text-on-dark transition-colors"
+                  >
+                    <ArrowUpRight size={14} />
                   </Link>
                 </td>
               </tr>
@@ -165,9 +183,9 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
         </table>
       </div>
 
-      <p className="text-[10px] text-[var(--text-muted)] mt-3">
-        All metrics are from historical MT5 backtest reports (as-tested). Click column headers to sort.
-        Capital is the tested cent-account balance, shown in account currency (USC) with a lakh-size label. 100 USC = 1 USD.
+      <p className="mt-4 text-[11px] text-ink-3 leading-relaxed">
+        All figures are as-tested from MT5 Strategy Tester reports. Capital is the tested cent-account balance (USC),
+        shown with its lakh-size label; 100 USC = 1 USD.
       </p>
     </div>
   );

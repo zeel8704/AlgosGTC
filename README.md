@@ -1,9 +1,9 @@
-# Aurum Quant — XAUUSD Algo Showcase
+# Golden Teak Capital: XAUUSD Strategy Showcase
 
 A production-quality marketing + analytics site for three XAUUSD (gold) algorithmic
 trading strategies. Built with Next.js (App Router), TypeScript, Tailwind CSS and
 Recharts. Every performance figure is derived from, and reconciled to, the source
-MetaTrader 5 Strategy Tester reports — nothing is estimated or fabricated.
+MetaTrader 5 Strategy Tester reports. Nothing is estimated or fabricated.
 
 > **These are historical backtests, not live or forward-tested results.** The site
 > states this throughout and discloses the exact data adjustments it makes.
@@ -19,11 +19,11 @@ MetaTrader 5 Strategy Tester reports — nothing is estimated or fabricated.
 | **Micro** | Long & short | 300,000 USC (3L)* | 809,178 USC | 30.02% | ~78.5% |
 
 \* Micro is **rebased** from its 500,000 USC source backtest to a 300,000 USC (3L) account.
-The EA trades fixed 0.01 lots, so trades are identical at any balance: absolute P&L and
+It trades a fixed position size, so trades are identical at any balance: absolute P&L and
 drawdowns (net profit, gross, PF, drawdown in USC, trade counts) are unchanged; only the
-percentage returns/drawdowns scale to the smaller base. See Methodology.
+percentage returns/drawdowns scale to the smaller base.
 
-All three are grid/averaging EAs on XAUUSD (M1), backtested on 100% real tick data on
+All three are mean-reversion EAs on XAUUSD, backtested on 100% real tick data on
 Vantage Markets over ~2.7 years (Jan 2024 → Sep 2026).
 
 ### Account currency (USC)
@@ -33,34 +33,28 @@ where **100 USC = 1 USD**. Values are shown exactly as the reports state them, w
 currency conversion applied (per project requirement). "10L / 5L / 1L" are lakh-size
 labels for the tested cent-account balances.
 
-### The "adjusted" (ex-news-day) view
+### As-tested figures only
 
-Because these systems hold losing baskets until they recover, the realized balance
-curve almost never prints a losing day; the real risk is the **floating equity drawdown**.
-The site therefore offers two views everywhere:
-
-- **As-tested** — the figures exactly as the MT5 report produced them.
-- **Adjusted (ex-news-day)** — excludes the single calendar day containing each
-  strategy's deepest balance-drawdown event (a news spike the EA's mobile-pause control
-  is intended to sit out live), and recomputes every metric from the remaining deals.
-
-The exact day removed, the trades on it, and the before/after drawdown are disclosed on
-each strategy page and in the Methodology. Report-only stats (Sharpe, floating-equity
-drawdown, average hold time) cannot be recomputed after exclusion and are shown as-tested
-in both views.
+The site shows every metric exactly as the MT5 report produced it (as-tested). The data
+layer still computes an "adjusted (ex-news-day)" variant (excluding the single calendar
+day with each strategy's deepest balance-drawdown event), but it is not displayed.
+The realized balance curve rarely prints a losing day; the real downside is the
+**floating equity drawdown**, which is shown as "Max equity DD".
 
 ---
 
 ## Pages
 
-- `/` — homepage (hero, strategy cards, comparison, capital, methodology, FAQ, CTA)
-- `/algos` — portfolio (cards, capital comparison, head-to-head table, snapshot)
-- `/algos/[slug]` — per-strategy detail (`standard` / `mini` / `micro`) with an
-  as-tested ↔ adjusted toggle driving every metric and chart
-- `/performance-lab` — interactive analytics (strategy/period/chart selectors,
-  scenario + normalize toggles, metrics panel, benchmark placeholder)
-- `/methodology` — data provenance, conventions, the adjustment definition, limitations
-- `/contact` — "Request an Algo Evaluation" form (validated, **demo mode** — see below)
+- `/`: homepage (hero + strategy ledger, approach, GTC suite, capital ladder,
+  head-to-head comparison, FAQ, CTA)
+- `/algos`: strategy suite (cards, capital requirements, head-to-head table)
+- `/algos/[slug]`: per-strategy detail (`mini` / `micro` / `standard`): key figures,
+  balance curve, monthly returns, trade statistics, backtest and capital details (as-tested)
+- `/contact`: "Request an evaluation" form (validated, **demo mode**; see below)
+
+Strategies are named GTC Mini, GTC Micro and GTC Standard and appear everywhere in
+ascending order of tested capital (1L → 3L → 10L). Strategy internals and parameters are
+not published; each is described only as mean reversion.
 
 ---
 
@@ -88,17 +82,17 @@ The three MT5 `.xlsx` reports are large (≈37 MB each, UTF-16, ~190k deal rows)
 contain account identifiers, so they are **not** committed. They were parsed offline
 into compact, validated JSON:
 
-- `src/data/datasets/{standard,mini,micro}.json` — summary metrics, daily balance
+- `src/data/datasets/{standard,mini,micro}.json`: summary metrics, daily balance
   series (as-tested + adjusted), monthly aggregates, and the report passthrough.
-- `src/data/dataset.ts` — typed loader for the JSON.
-- `src/data/strategies.ts` — transforms datasets + human-authored config into the
+- `src/data/dataset.ts`: typed loader for the JSON.
+- `src/data/strategies.ts`: transforms datasets + human-authored config into the
   `StrategyData` shape the UI consumes (equity/drawdown series, monthly returns, both
   metric scenarios).
 - `src/lib/analytics` conventions live in `src/lib/formatters.ts` and the transformer;
   `scripts/check-data.mjs` asserts the computed figures reconcile to the report.
 
 `npm run check:data` prints 14 checks per strategy (net profit, gross, profit factor,
-balance drawdown, trade counts, daily-sum, adjusted invariants) — all must pass.
+balance drawdown, trade counts, daily-sum, adjusted invariants). All must pass.
 
 ### Downloadable data
 
@@ -136,9 +130,13 @@ npx vercel --prod   # production deploy
 
 Everything brandable is centralized:
 
-- `src/config/brand.ts` — name, tagline, contact placeholders, legal, nav links,
-  product names, risk disclaimer, methodology/cent-account notes.
-- `src/app/globals.css` — color tokens (navy/gold theme), typography, component styles.
+- `src/config/brand.ts`: name, tagline, contact placeholders, legal, nav links,
+  product names, tier labels, palette (read by the charts), risk disclaimer, cent-account note.
+- `src/app/globals.css`: Tailwind theme tokens taken from the Golden Teak Capital logo
+  (cream, ivory, espresso ink, teak gold), plus button, card and typography styles.
+- `src/components/Logo.tsx`: the Golden Teak Capital wordmark (tracked EB Garamond capitals), rendered in code.
+- Fonts: EB Garamond (wordmark), Playfair Display (headings) and Inter (text), loaded with `next/font` in
+  `src/app/layout.tsx`. `src/app/opengraph-image.png` is the logo used for link previews.
 
 Change the brand name, product names, theme colors, and copy there without touching
 components.
@@ -147,17 +145,15 @@ components.
 
 ## Implemented vs. future integrations
 
-**Works now, no integrations:** all pages, charts, the Performance Lab, comparison
-table, capital displays, CSV downloads, and the validated dataset.
+**Works now, no integrations:** all pages, charts, the comparison table, capital
+displays, and the validated dataset.
 
 **Placeholders / future work (clearly marked in the UI):**
 
-- **Contact form** runs in **demo mode** — it validates input and shows a success state
+- **Contact form** runs in **demo mode**: it validates input and shows a success state
   but sends/stores nothing. To go live, POST the validated payload from
   `src/components/ContactForm.tsx` to an email service (e.g. Resend) or a Next.js route
   handler / form backend.
-- **Benchmark (gold buy-and-hold)** panel in the Performance Lab is shown as *unavailable*
-  — no benchmark series is fabricated. Provide a dated XAUUSD price series to populate it.
 - **Forward-test** sections are labelled "not yet available"; wire in a forward-test
   dataset in the same shape when ready.
 - A **database / client portal / account verification** can be added behind the existing
