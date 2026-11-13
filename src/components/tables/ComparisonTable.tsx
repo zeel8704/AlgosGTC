@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { StrategyData, PerformanceMetrics } from '@/types';
-import { COMPARISON_METRICS, DEFAULT_COMPARISON_KEYS } from '@/lib/metrics';
+import { COLUMN_METRICS, DEFAULT_COMPARISON_KEYS } from '@/lib/metrics';
 import { formatMetric } from '@/lib/formatters';
 import { ArrowDown, ArrowUp, ArrowUpRight, ChevronsUpDown, SlidersHorizontal, Check } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showPicker, setShowPicker] = useState(false);
 
-  const visibleMetrics = COMPARISON_METRICS.filter((m) => selectedMetrics.includes(m.key));
+  const visibleMetrics = COLUMN_METRICS.filter((m) => selectedMetrics.includes(m.key));
 
   const sorted = [...strategies].sort((a, b) => {
     if (!sortKey) return 0;
@@ -32,7 +32,7 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
   // Best value per column, for metrics with a clear direction.
   const best = useMemo(() => {
     const out: Record<string, string> = {};
-    for (const m of COMPARISON_METRICS) {
+    for (const m of COLUMN_METRICS) {
       if (m.higherIsBetter === undefined) continue;
       let winner: StrategyData | null = null;
       for (const s of strategies) {
@@ -51,7 +51,7 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
       setSortDir(sortDir === 'desc' ? 'asc' : 'desc');
     } else {
       setSortKey(key);
-      const metric = COMPARISON_METRICS.find((m) => m.key === key);
+      const metric = COLUMN_METRICS.find((m) => m.key === key);
       setSortDir(metric?.higherIsBetter === false ? 'asc' : 'desc');
     }
   };
@@ -64,7 +64,7 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <p className="text-xs text-ink-3 flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-gold" aria-hidden="true" />
-          Marks the strongest figure in each column. Select a column header to sort.
+          Marks the best figure in each column. Select a heading to sort.
         </p>
         <button
           onClick={() => setShowPicker((v) => !v)}
@@ -77,15 +77,16 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
 
       {showPicker && (
         <div className="mb-5 rounded-[4px] border border-line bg-sand/50 p-4">
-          <p className="label mb-3">Show metrics</p>
+          <p className="label mb-3">Show columns</p>
           <div className="flex flex-wrap gap-2">
-            {COMPARISON_METRICS.map((m) => {
+            {COLUMN_METRICS.map((m) => {
               const on = selectedMetrics.includes(m.key);
               return (
                 <button
                   key={m.key}
                   onClick={() => toggleMetric(m.key)}
                   aria-pressed={on}
+                  title={m.description}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                     on ? 'border-ink bg-ink text-on-dark' : 'border-line-strong bg-ivory text-ink-2 hover:border-ink-2'
                   }`}
@@ -102,9 +103,9 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
       <div className="table-scroll">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-ink/80">
+            <tr className="border-b border-ink/80 align-bottom">
               <th scope="col" className="sticky left-0 z-10 bg-ivory py-3 pr-4 text-left label text-[10px]">
-                Strategy
+                Plan
               </th>
               {visibleMetrics.map((m) => {
                 const active = sortKey === m.key;
@@ -113,26 +114,26 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
                     key={m.key}
                     scope="col"
                     aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'}
-                    className="py-3 px-3 text-right whitespace-nowrap"
+                    className="py-3 px-3 text-right"
                   >
                     <button
                       onClick={() => handleSort(m.key)}
-                      title={m.description}
-                      className={`inline-flex items-center gap-1 label text-[10px] tracking-[0.1em] hover:text-ink transition-colors ${
+                      title={`${m.technical ?? m.label}: ${m.description}`}
+                      className={`inline-flex items-end justify-end gap-1 text-right label text-[10px] tracking-[0.1em] leading-snug hover:text-ink transition-colors ${
                         active ? 'text-ink' : ''
                       }`}
                     >
-                      {m.label}
+                      <span className="max-w-[6.5rem] whitespace-normal">{m.label}</span>
                       {active ? (
-                        sortDir === 'desc' ? <ArrowDown size={11} /> : <ArrowUp size={11} />
+                        sortDir === 'desc' ? <ArrowDown size={11} className="shrink-0 mb-px" /> : <ArrowUp size={11} className="shrink-0 mb-px" />
                       ) : (
-                        <ChevronsUpDown size={11} className="opacity-40" />
+                        <ChevronsUpDown size={11} className="shrink-0 mb-px opacity-40" />
                       )}
                     </button>
                   </th>
                 );
               })}
-              <th scope="col" className="py-3 px-3 text-right label text-[10px] tracking-[0.1em] whitespace-nowrap">Capital</th>
+              <th scope="col" className="py-3 px-3 text-right label text-[10px] tracking-[0.1em] whitespace-nowrap">Start with</th>
               <th scope="col" className="py-3 pl-2"><span className="sr-only">Open</span></th>
             </tr>
           </thead>
@@ -184,8 +185,12 @@ export function ComparisonTable({ strategies }: ComparisonTableProps) {
       </div>
 
       <p className="mt-4 text-[11px] text-ink-3 leading-relaxed">
-        All figures are as-tested from MT5 Strategy Tester reports. Capital is the tested cent-account balance (USC),
-        shown with its lakh-size label; 100 USC = 1 USD.
+        All figures come from the backtest, a replay of January 2024 to September 2026, not from live trading. &ldquo;Start
+        with&rdquo; is the balance each plan was tested from, in USC (100 USC = 1 USD).{' '}
+        <Link href="/how-it-works#numbers" className="text-gold-deep underline underline-offset-2">
+          What each column means
+        </Link>
+        .
       </p>
     </div>
   );

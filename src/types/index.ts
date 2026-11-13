@@ -139,6 +139,8 @@ export interface ComparisonMetric {
   label: string;
   description: string;
   format: 'currency' | 'percentage' | 'number' | 'integer' | 'ratio' | 'time';
+  /** The conventional name (shown in tooltips); `label` is the plain-language name. */
+  technical?: string;
   higherIsBetter?: boolean;
 }
 

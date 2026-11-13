@@ -45,16 +45,29 @@ The realized balance curve rarely prints a losing day; the real downside is the
 
 ## Pages
 
-- `/`: homepage (hero + strategy ledger, approach, GTC suite, capital ladder,
-  head-to-head comparison, FAQ, CTA)
-- `/algos`: strategy suite (cards, capital requirements, head-to-head table)
-- `/algos/[slug]`: per-strategy detail (`mini` / `micro` / `standard`): key figures,
-  balance curve, monthly returns, trade statistics, backtest and capital details (as-tested)
-- `/contact`: "Request an evaluation" form (validated, **demo mode**; see below)
+- `/`: homepage (hero + results at a glance, in plain terms, the five steps, plans,
+  glossary teaser, risks, side-by-side comparison, FAQ, CTA)
+- `/how-it-works`: the full first-timer explanation: plain terms, five steps, what you need /
+  what we do, how GTC trades, every number explained, risks, all FAQs (anchors: #steps #need
+  #trades #numbers #risks #faq)
+- `/algos`: plans (quick chooser by starting balance, cards, starting-balance table,
+  side-by-side comparison)
+- `/algos/[slug]`: per-plan detail (`mini` / `micro` / `standard`): plain summary, key
+  figures, balance curve, monthly returns, trade statistics, about the test, what you need
+- `/contact`: "Get started" form (validated, **demo mode**; see below)
 
-Strategies are named GTC Mini, GTC Micro and GTC Standard and appear everywhere in
-ascending order of tested capital (1L → 3L → 10L). Strategy internals and parameters are
-not published; each is described only as mean reversion.
+The product is a managed account service: the client opens and funds an MT5 cent account in
+their own name, grants trading access, and GTC trades gold on it. Pricing is never shown on
+the site; it is shared during the free evaluation.
+
+The three plans, GTC Mini, GTC Micro and GTC Standard, appear everywhere in ascending order
+of starting balance (1L, 3L, 10L). Strategy internals and parameters are not published; each
+is described only as mean reversion.
+
+Copy is written for first-time readers. Every metric has a plain-language name, a technical
+name and an explanation in `src/lib/metrics.ts` (`metricText`); shared explanatory content
+(steps, glossary, risks, FAQ) lives in `src/content/explain.ts` and renders through
+`src/components/explain/*`.
 
 ---
 

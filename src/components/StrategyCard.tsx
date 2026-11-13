@@ -7,7 +7,7 @@ import { ArrowUpRight } from 'lucide-react';
 
 interface StrategyCardProps {
   strategy: StrategyData;
-  /** Renders the card on espresso; used for the flagship tier. */
+  /** Renders the card on espresso; used for the flagship plan. */
   featured?: boolean;
 }
 
@@ -22,10 +22,11 @@ export function StrategyCard({ strategy, featured = false }: StrategyCardProps) 
   const rule = dark ? 'border-on-dark/12' : 'border-line';
   const labelCls = `label ${dark ? 'text-on-dark-2' : ''}`;
 
+  // Short plain-language labels; the full explanations live in the glossary.
   const metrics: [string, string][] = [
-    ['CAGR', formatPercentUnsigned(m.cagr)],
-    ['Max DD', formatPercentUnsigned(m.maxDrawdownPct)],
-    ['Profit factor', formatRatio(m.profitFactor)],
+    ['Growth / year', formatPercentUnsigned(m.cagr)],
+    ['Biggest fall', formatPercentUnsigned(m.maxDrawdownPct)],
+    ['Earned per 1 lost', formatRatio(m.profitFactor)],
   ];
 
   return (
@@ -39,7 +40,7 @@ export function StrategyCard({ strategy, featured = false }: StrategyCardProps) 
       <div className="flex-1 flex flex-col p-7 sm:p-8">
         <div className="flex items-center justify-between gap-3">
           <span className={dark ? 'eyebrow-dark' : 'eyebrow'}>
-            Tier {tier?.numeral} · {tier?.label}
+            Plan {tier?.numeral} · {tier?.label}
           </span>
           <span className={`text-[10.5px] font-semibold uppercase tracking-[0.14em] ${muted}`}>{config.direction}</span>
         </div>
@@ -53,7 +54,7 @@ export function StrategyCard({ strategy, featured = false }: StrategyCardProps) 
 
         <div className={`mt-7 pt-6 border-t ${rule} flex items-end justify-between gap-5`}>
           <div className="shrink-0">
-            <div className={labelCls}>Tested balance</div>
+            <div className={labelCls}>Start with</div>
             <div className={`mt-2 font-display text-[46px] leading-[0.9] ${dark ? 'text-gold-soft' : 'text-gold-deep'}`}>
               {config.capitalRequirement.minimumINR}
             </div>
@@ -80,10 +81,10 @@ export function StrategyCard({ strategy, featured = false }: StrategyCardProps) 
 
       <div className={`px-7 sm:px-8 py-4 border-t ${rule} flex items-center justify-between gap-3`}>
         <span className={`text-xs tnum ${muted}`}>
-          {formatDateShort(config.testPeriod.startDate)} to {formatDateShort(config.testPeriod.endDate)}
+          Tested {formatDateShort(config.testPeriod.startDate)} to {formatDateShort(config.testPeriod.endDate)}
         </span>
         <span className={`link-gold ${dark ? 'text-gold-soft' : ''}`}>
-          View strategy <ArrowUpRight size={14} />
+          View plan <ArrowUpRight size={14} />
         </span>
       </div>
     </article>

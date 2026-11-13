@@ -1,128 +1,158 @@
 import type { ComparisonMetric } from '@/types';
 
 /**
- * All metrics available for display and comparison.
- * Each metric includes a tooltip description, format, and sort direction.
+ * Every metric the site shows, in plain language.
+ * `label` is what a first-time reader sees; `technical` is the conventional name, shown in
+ * tooltips next to the explanation so experienced readers can map it back.
  */
 export const COMPARISON_METRICS: ComparisonMetric[] = [
   {
     key: 'cagr',
-    label: 'CAGR',
-    description: 'Compound Annual Growth Rate: the annualized return over the test period.',
+    label: 'Growth per year',
+    technical: 'CAGR',
+    description:
+      'How much the account grew each year on average during the test, with profits reinvested. 60% means 1L would have become about 1.6L in a year, if the test repeated.',
     format: 'percentage',
     higherIsBetter: true,
   },
   {
     key: 'totalNetProfit',
-    label: 'Net Profit',
-    description: 'Total realized profit after commissions, swaps, and fees.',
+    label: 'Profit in the test',
+    technical: 'Net profit',
+    description: 'Total profit the account made over the whole test after all trading costs, in USC.',
     format: 'currency',
     higherIsBetter: true,
   },
   {
     key: 'maxDrawdownPct',
-    label: 'Max Drawdown',
-    description: 'Largest peak-to-trough balance decline as a percentage. Lower is better.',
+    label: 'Biggest fall from peak',
+    technical: 'Max balance drawdown',
+    description:
+      'The largest drop in the account balance from a high point to the next low point, counting closed trades only. Lower is better.',
     format: 'percentage',
     higherIsBetter: false,
   },
   {
     key: 'equityDDMaxPct',
-    label: 'Max Equity DD',
-    description: 'Largest floating (unrealized) drawdown of account equity during the test. Lower is better.',
+    label: 'Deepest open-trade dip',
+    technical: 'Max equity drawdown',
+    description:
+      'At the worst moment of the test, how far the account value fell while trades were still open and waiting for gold to recover. This is the figure to size your capital for. Lower is better.',
     format: 'percentage',
     higherIsBetter: false,
   },
   {
     key: 'marRatio',
-    label: 'MAR Ratio',
-    description: 'CAGR divided by maximum drawdown percentage. Higher means better risk-adjusted return.',
+    label: 'Growth vs. biggest fall',
+    technical: 'MAR ratio',
+    description: 'Growth per year divided by the biggest fall from peak. Higher means more growth for the pain endured.',
     format: 'ratio',
     higherIsBetter: true,
   },
   {
     key: 'profitFactor',
-    label: 'Profit Factor',
-    description: 'Gross profit divided by gross loss. Values above 1.0 indicate net profitability.',
+    label: 'Earned per 1 lost',
+    technical: 'Profit factor',
+    description:
+      'Total profit from winning trades divided by total loss from losing trades. 1.5 means the strategy earned 1.50 for every 1.00 it lost. Anything above 1 is profitable overall.',
     format: 'ratio',
     higherIsBetter: true,
   },
   {
     key: 'winRate',
-    label: 'Win Rate',
-    description: 'Percentage of closed trades that were profitable.',
+    label: 'Winning trades',
+    technical: 'Win rate',
+    description: 'The share of closed trades that ended in profit.',
     format: 'percentage',
     higherIsBetter: true,
   },
   {
     key: 'totalTrades',
-    label: 'Total Trades',
-    description: 'Number of closed round-trip trades during the test period.',
+    label: 'Trades in the test',
+    technical: 'Total trades',
+    description: 'How many trades were opened and closed during the 2.7-year test.',
     format: 'integer',
   },
   {
     key: 'sharpeRatio',
-    label: 'Sharpe Ratio',
-    description: 'Risk-adjusted return metric. Higher values indicate better return per unit of risk.',
+    label: 'Steadiness of returns',
+    technical: 'Sharpe ratio',
+    description: 'A standard score of return against its ups and downs. Higher means the growth was steadier.',
     format: 'ratio',
     higherIsBetter: true,
   },
   {
     key: 'recoveryFactor',
-    label: 'Recovery Factor',
-    description: 'Net profit divided by maximum drawdown. Measures how well the strategy recovers from losses.',
+    label: 'Profit vs. biggest fall',
+    technical: 'Recovery factor',
+    description: 'Total profit divided by the biggest fall from peak. Higher means the losses were small next to what was earned.',
     format: 'ratio',
     higherIsBetter: true,
   },
   {
     key: 'expectedPayoff',
-    label: 'Expected Payoff',
-    description: 'Average profit per trade, accounting for both winners and losers.',
+    label: 'Average result per trade',
+    technical: 'Expected payoff',
+    description: 'The average profit or loss per trade, counting winners and losers together.',
     format: 'currency',
     higherIsBetter: true,
   },
   {
     key: 'maxDrawdownAbs',
-    label: 'Max DD (Absolute)',
-    description: 'Largest peak-to-trough balance decline in dollar terms.',
+    label: 'Biggest fall from peak (USC)',
+    technical: 'Max drawdown, absolute',
+    description: 'The biggest fall from peak measured in USC rather than as a percentage. Lower is better.',
     format: 'currency',
     higherIsBetter: false,
   },
   {
     key: 'grossProfit',
-    label: 'Gross Profit',
-    description: 'Sum of all profitable trades before costs.',
+    label: 'Total from winning trades',
+    technical: 'Gross profit',
+    description: 'All winning trades added together, before losing trades are subtracted.',
     format: 'currency',
     higherIsBetter: true,
   },
   {
     key: 'grossLoss',
-    label: 'Gross Loss',
-    description: 'Sum of all losing trades (shown as negative).',
+    label: 'Total from losing trades',
+    technical: 'Gross loss',
+    description: 'All losing trades added together, shown as a negative number.',
     format: 'currency',
     higherIsBetter: false,
   },
   {
     key: 'largestProfitTrade',
-    label: 'Best Trade',
-    description: 'Profit of the single most profitable trade.',
+    label: 'Best single trade',
+    technical: 'Largest profit trade',
+    description: 'The profit on the single most profitable trade.',
     format: 'currency',
   },
   {
     key: 'largestLossTrade',
-    label: 'Worst Trade',
-    description: 'Loss of the single worst trade.',
+    label: 'Worst single trade',
+    technical: 'Largest loss trade',
+    description: 'The loss on the single worst trade.',
     format: 'currency',
   },
   {
     key: 'avgHoldTime',
-    label: 'Avg Hold Time',
-    description: 'Average time a position was held open.',
+    label: 'Typical trade length',
+    technical: 'Average hold time',
+    description: 'How long a trade stayed open on average, as hours:minutes:seconds.',
     format: 'time',
   },
+  // Shown on the strategy page only (not available as comparison columns).
+  { key: 'winningTrades', label: 'Number of winning trades', technical: 'Winning trades', description: 'How many closed trades ended in profit.', format: 'integer' },
+  { key: 'losingTrades', label: 'Number of losing trades', technical: 'Losing trades', description: 'How many closed trades ended in a loss.', format: 'integer' },
+  { key: 'avgProfitTrade', label: 'Average winning trade', technical: 'Average profit trade', description: 'The average profit on a winning trade, in USC.', format: 'currency' },
+  { key: 'avgLossTrade', label: 'Average losing trade', technical: 'Average loss trade', description: 'The average loss on a losing trade, in USC.', format: 'currency' },
 ];
 
-/** Default metrics shown in the comparison table */
+/** Metrics offered as columns in the comparison table. */
+export const COLUMN_METRICS = COMPARISON_METRICS.slice(0, 17);
+
+/** Default columns in the comparison table. */
 export const DEFAULT_COMPARISON_KEYS: string[] = [
   'cagr',
   'totalNetProfit',
@@ -132,3 +162,12 @@ export const DEFAULT_COMPARISON_KEYS: string[] = [
   'winRate',
   'totalTrades',
 ];
+
+const byKey = new Map(COMPARISON_METRICS.map((m) => [m.key, m]));
+
+/** Plain label, technical name and explanation for a metric key. */
+export function metricText(key: ComparisonMetric['key']) {
+  const m = byKey.get(key);
+  if (!m) throw new Error(`Unknown metric: ${String(key)}`);
+  return { label: m.label, technical: m.technical ?? m.label, help: m.description };
+}

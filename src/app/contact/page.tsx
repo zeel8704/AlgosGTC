@@ -1,16 +1,19 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
+import Link from 'next/link';
 import { ContactForm } from '@/components/ContactForm';
+import { ArrowUpRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Request an evaluation',
-  description: 'Request a private evaluation of the GTC strategies for your capital and risk tolerance.',
+  title: 'Get started',
+  description:
+    'Tell Golden Teak Capital how much you can start with. We recommend a plan, explain the numbers and share pricing. Free, with no obligation.',
 };
 
 const STEPS = [
-  { n: '01', title: 'Share your setup', body: 'Capital range, broker and the tier you are considering. It takes two minutes.' },
-  { n: '02', title: 'We review fit', body: 'We compare your account against the balance each strategy was tested on.' },
-  { n: '03', title: 'Walkthrough', body: 'You receive a recommendation and the reports behind it, by email or a call.' },
+  { n: '01', title: 'Tell us about yourself', body: 'How much you can start with, and your broker if you already have one. Two minutes.' },
+  { n: '02', title: 'We recommend a plan', body: 'We compare your starting balance with the balance each plan was tested on, then walk you through the numbers and pricing.' },
+  { n: '03', title: 'We set you up', body: 'You open and fund a broker account in your name and grant us trading access. GTC starts trading, and you watch it live.' },
 ];
 
 export default function ContactPage() {
@@ -18,13 +21,13 @@ export default function ContactPage() {
     <section className="paper border-b border-line">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-12 pb-24 lg:pt-16 grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-16">
         <div className="lg:col-span-5">
-          <p className="eyebrow rise">Contact</p>
+          <p className="eyebrow rise">Get started</p>
           <h1 className="mt-6 font-display text-[46px] sm:text-[60px] leading-[0.98] tracking-[-0.025em] text-ink rise rise-1">
-            Request a private <em className="text-gold-deep">evaluation.</em>
+            Start with a <em className="text-gold-deep">conversation.</em>
           </h1>
           <p className="mt-7 text-lg leading-relaxed text-ink-2 rise rise-2">
-            Tell us a little about your account and we&rsquo;ll assess which strategy fits your capital and risk
-            tolerance. No obligation. This is an evaluation, not a purchase.
+            Tell us a little about yourself and we will recommend the plan that fits, explain every number, and share
+            pricing. The evaluation is free and carries no obligation.
           </p>
 
           <ol className="mt-12 border-t border-line rise rise-3">
@@ -38,6 +41,13 @@ export default function ContactPage() {
               </li>
             ))}
           </ol>
+
+          <p className="mt-8 text-sm text-ink-2 rise rise-4">
+            New to all this?{' '}
+            <Link href="/how-it-works" className="link-gold">
+              Read how it works first <ArrowUpRight size={13} />
+            </Link>
+          </p>
         </div>
 
         <div className="lg:col-span-7 rise rise-2">

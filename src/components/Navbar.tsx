@@ -61,7 +61,7 @@ export function Navbar() {
               })}
             </ul>
             <Link href="/contact" className="btn btn-dark py-3 px-5">
-              Request evaluation <ArrowRight size={14} />
+              Get started <ArrowRight size={14} />
             </Link>
           </div>
 
@@ -103,7 +103,7 @@ export function Navbar() {
           </ul>
           <div className="px-5 sm:px-8 pb-8">
             <Link href="/contact" onClick={() => setMobileOpen(false)} className="btn btn-dark w-full">
-              Request evaluation <ArrowRight size={14} />
+              Get started <ArrowRight size={14} />
             </Link>
           </div>
         </div>

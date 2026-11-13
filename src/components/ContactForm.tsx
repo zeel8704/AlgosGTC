@@ -34,8 +34,8 @@ export function ContactForm() {
     if (!form.name.trim()) e.name = 'Please enter your name.';
     if (!form.email.trim()) e.email = 'Please enter your email.';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Enter a valid email address.';
-    if (!form.preferredAlgo) e.preferredAlgo = 'Select a strategy.';
-    if (!form.capitalRange) e.capitalRange = 'Select a capital range.';
+    if (!form.preferredAlgo) e.preferredAlgo = 'Select a plan.';
+    if (!form.capitalRange) e.capitalRange = 'Select a starting balance.';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -68,7 +68,7 @@ export function ContactForm() {
         </span>
         <h2 className="mt-7 font-display text-3xl text-ink">Request captured</h2>
         <p className="mt-4 mx-auto max-w-md text-ink-2 leading-relaxed">
-          Thank you, {form.name.split(' ')[0]}. Your evaluation request for{' '}
+          Thank you, {form.name.split(' ')[0]}. Your request about{' '}
           <strong className="font-semibold text-gold-deep">{selectedName}</strong> has been validated.
         </p>
         <div className="mt-8 mx-auto flex max-w-md items-start gap-3 rounded-[4px] border border-line bg-sand/60 p-4 text-left text-xs leading-relaxed text-ink-2">
@@ -109,22 +109,22 @@ export function ContactForm() {
           {errorText("email-err", errors.email)}
         </div>
         <div>
-          <label className={labelCls} htmlFor="algo">Preferred strategy *</label>
+          <label className={labelCls} htmlFor="algo">Plan you are considering *</label>
           <select id="algo" className={inputCls(errors.preferredAlgo)} value={form.preferredAlgo}
             aria-invalid={!!errors.preferredAlgo} aria-describedby={errors.preferredAlgo ? 'algo-err' : undefined}
             onChange={(e) => set('preferredAlgo', e.target.value)}>
-            <option value="">Select a tier…</option>
+            <option value="">Select a plan…</option>
             {strategies.map((s) => (
               <option key={s.config.id} value={s.config.shortName}>
                 {s.config.name} ({s.config.capitalRequirement.minimumINR})
               </option>
             ))}
-            <option value="Undecided">Undecided</option>
+            <option value="Undecided">Not sure yet, recommend one</option>
           </select>
           {errorText("algo-err", errors.preferredAlgo)}
         </div>
         <div>
-          <label className={labelCls} htmlFor="capital">Approx. capital *</label>
+          <label className={labelCls} htmlFor="capital">How much can you start with? *</label>
           <select id="capital" className={inputCls(errors.capitalRange)} value={form.capitalRange}
             aria-invalid={!!errors.capitalRange} aria-describedby={errors.capitalRange ? 'capital-err' : undefined}
             onChange={(e) => set('capitalRange', e.target.value)}>
@@ -139,14 +139,14 @@ export function ContactForm() {
             onChange={(e) => set('country', e.target.value)} placeholder="Optional" />
         </div>
         <div>
-          <label className={labelCls} htmlFor="broker">Broker / platform</label>
+          <label className={labelCls} htmlFor="broker">Broker, if you have one</label>
           <input id="broker" className={inputCls()} value={form.broker}
-            onChange={(e) => set('broker', e.target.value)} placeholder="e.g. Vantage / MT5" />
+            onChange={(e) => set('broker', e.target.value)} placeholder="e.g. Vantage, or none yet" />
         </div>
       </div>
 
       <fieldset className="mt-8">
-        <legend className={labelCls}>Preferred next step</legend>
+        <legend className={labelCls}>How would you like to hear from us?</legend>
         <div className="flex flex-wrap gap-2">
           {NEXT_STEPS.map((step) => {
             const on = form.nextStep === step;

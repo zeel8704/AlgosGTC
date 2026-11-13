@@ -18,13 +18,13 @@ export function Footer() {
               <Logo variant="dark" size="md" />
             </Link>
             <p className="mt-6 max-w-sm text-sm leading-relaxed text-on-dark-2">
-              Systematic mean-reversion strategies for XAUUSD, each sized to the account it was tested on and
-              documented with real-tick backtest data.
+              We trade gold for you, in your own broker account, using our GTC algorithm. Three plans by starting
+              balance, each tested on 2.7 years of real price data.
             </p>
           </div>
 
           <div className="md:col-span-3">
-            <h2 className="eyebrow-dark mb-5">Strategies</h2>
+            <h2 className="eyebrow-dark mb-5">Plans</h2>
             <ul className="space-y-3">
               {strategies.map((s) => (
                 <li key={s.config.id}>
@@ -34,7 +34,7 @@ export function Footer() {
                   >
                     <span>{s.config.name}</span>
                     <span className="tnum text-xs text-on-dark-2 group-hover:text-gold-soft">
-                      {s.config.capitalRequirement.minimumINR}
+                      from {s.config.capitalRequirement.minimumINR}
                     </span>
                   </Link>
                 </li>
@@ -43,10 +43,12 @@ export function Footer() {
           </div>
 
           <div className="md:col-span-2 md:col-start-11">
-            <h2 className="eyebrow-dark mb-5">Firm</h2>
+            <h2 className="eyebrow-dark mb-5">Learn</h2>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/algos" className="text-on-dark hover:text-gold-soft transition-colors">All strategies</Link></li>
-              <li><Link href="/contact" className="text-on-dark hover:text-gold-soft transition-colors">Request evaluation</Link></li>
+              <li><Link href="/how-it-works" className="text-on-dark hover:text-gold-soft transition-colors">How it works</Link></li>
+              <li><Link href="/how-it-works#numbers" className="text-on-dark hover:text-gold-soft transition-colors">The numbers, explained</Link></li>
+              <li><Link href="/how-it-works#risks" className="text-on-dark hover:text-gold-soft transition-colors">Risks</Link></li>
+              <li><Link href="/contact" className="text-on-dark hover:text-gold-soft transition-colors">Get started</Link></li>
             </ul>
           </div>
         </div>

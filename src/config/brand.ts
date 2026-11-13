@@ -4,9 +4,9 @@
 export const BRAND = {
   name: 'Golden Teak Capital',
   shortName: 'Golden Teak',
-  tagline: 'Systematic Gold Strategies',
+  tagline: 'Managed gold trading',
   description:
-    'Golden Teak Capital: systematic XAUUSD mean-reversion strategies with documented, real-tick backtest performance.',
+    'Golden Teak Capital trades gold for you, in your own broker account, using its GTC algorithm. Three plans by starting balance, with results from a 2.7-year test on real price data.',
   // Placeholder contact details; replace with the firm's real domain/handles before launch.
   url: 'https://goldenteakcapital.com',
   contact: {
@@ -57,7 +57,8 @@ export const ALGO_ORDER = ['Mini', 'Micro', 'Standard'] as const;
 
 export const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/algos', label: 'Strategies' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/algos', label: 'Plans' },
   { href: '/contact', label: 'Contact' },
 ] as const;
 
